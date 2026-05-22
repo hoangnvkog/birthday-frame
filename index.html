@@ -4,18 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rực Rỡ Tuổi 18 - Chúc Mừng Sinh Nhật</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col" style="min-height:100vh;display:flex;flex-direction:column;background: linear-gradient(135deg, #fff8f5 0%, #ffe4f0 50%, #fff0f7 100%);">
     
     <!-- Header -->
-    <header class="pt-6 pb-4">
-        <div class="container mx-auto px-4 text-center">
-            <div class="inline-block mb-4">
-                <svg class="w-16 h-16 mx-auto" viewBox="0 0 100 100" fill="none">
+    <header style="padding-top:1.5rem;padding-bottom:1rem;">
+        <div style="margin:0 auto;padding-left:1rem;padding-right:1rem;max-width:72rem;text-align:center;">
+            <div style="display:inline-block;margin-bottom:1rem;">
+                <svg style="width:4rem;height:4rem;margin:0 auto;" viewBox="0 0 100 100" fill="none">
                     <circle cx="50" cy="50" r="45" stroke="#c71585" stroke-width="2"/>
                     <text x="50" y="45" text-anchor="middle" fill="#c71585" font-family="Montserrat" font-weight="700" font-size="11">CELEBRATE</text>
                     <text x="50" y="60" text-anchor="middle" fill="#c71585" font-family="Montserrat" font-weight="800" font-size="14">18 YEARS</text>
@@ -25,39 +24,39 @@
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 flex items-center justify-center py-8">
-        <div class="container mx-auto px-4 max-w-6xl">
+    <main style="flex:1;display:flex;align-items:center;justify-content:center;padding-top:2rem;padding-bottom:2rem;">
+        <div style="margin:0 auto;padding-left:1rem;padding-right:1rem;max-width:72rem;">
             
             <!-- Title -->
-            <div class="text-center mb-8">
-                <h1 class="title-gradient font-extrabold text-4xl md:text-6xl uppercase tracking-tight mb-2">
-                    RỰC RỠ TUỔI <span class="text-[#c71585]">18</span>,
+            <div style="text-align:center;margin-bottom:2rem;">
+                <h1 style="font-size:2.25rem;font-weight:800;text-transform:uppercase;letter-spacing:-0.025em;margin-bottom:0.5rem;background: linear-gradient(135deg, #c71585 0%, #ff69b4 50%, #e91e63 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+                    RỰC RỠ TUỔI <span style="color:#c71585;">18</span>,
                 </h1>
-                <h2 class="text-xl md:text-3xl font-bold text-[#c71585] uppercase tracking-wide">
+                <h2 style="font-size:1.25rem;font-weight:700;color:#c71585;text-transform:uppercase;letter-spacing:0.025em;">
                     Còn bạn?
                 </h2>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            <div style="display:grid;grid-template-columns:1fr;gap:2rem;align-items:start;">
                 
                 <!-- Preview Image Box -->
-                <div class="order-2 lg:order-1">
-                    <div class="box-frame relative mx-auto" id="boxFrame">
-                        <div class="frame-container relative w-full aspect-square overflow-hidden rounded-lg">
+                <div style="order:2;">
+                    <div class="box-frame" id="boxFrame">
+                        <div style="position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;border-radius:0.5rem;">
                             <!-- User Image -->
-                            <div class="img-avatar absolute inset-0 bg-[#fff1ea] flex items-center justify-center overflow-hidden" id="imgAvatar">
-                                <div id="placeholderText" class="text-center p-4">
-                                    <svg class="w-16 h-16 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div id="imgAvatar" style="position:absolute;top:0;right:0;bottom:0;left:0;background:#fff1ea;display:flex;align-items:center[PAD]justify-content:center;overflow:hidden;">
+                                <div id="placeholderText" style="text-align:center;padding:1rem;">
+                                    <svg style="width:4rem;height:4rem;margin:0 auto 0.5rem;color:#d1d5db;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                     </svg>
-                                    <p class="text-gray-400 text-sm">Ảnh của bạn sẽ hiển thị ở đây</p>
+                                    <p style="color:#9ca3af;font-size:0.875rem;">Ảnh của bạn sẽ hiển thị ở đây</p>
                                 </div>
-                                <img src="" id="userImage" class="hidden w-full h-full object-cover" alt="User photo">
+                                <img src="" id="userImage" style="display:none;width:100%;height:100%;object-fit:cover;" alt="User photo">
                             </div>
                             
                             <!-- SVG Overlay Frame -->
-                            <div class="frame-overlay absolute inset-0 pointer-events-none z-10">
-                                <svg viewBox="0 0 400 400" class="w-full h-full" id="svgFrame">
+                            <div style="position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;z-index:10;">
+                                <svg viewBox="0 0 400 400" style="width:100%;height:100%;" id="svgFrame">
                                     <defs>
                                         <pattern id="bgPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
                                             <rect width="40" height="40" fill="#c71585" opacity="0.05"/>
@@ -71,22 +70,18 @@
                                     
                                     <!-- Corner decorations -->
                                     <g id="corners">
-                                        <!-- Top Left -->
                                         <path d="M0 0 L60 0 Q40 40 0 60 Z" fill="#c71585" opacity="0.9"/>
                                         <path d="M0 0 L45 0 Q30 30 0 45 Z" fill="#ff69b4"/>
-                                        <!-- Top Right -->
                                         <path d="M400 0 L340 0 Q360 40 400 60 Z" fill="#c71585" opacity="0.9"/>
                                         <path d="M400 0 L355 0 Q370 30 400 45 Z" fill="#ff69b4"/>
-                                        <!-- Bottom Left -->
                                         <path d="M0 400 L60 400 Q40 360 0 340 Z" fill="#c71585" opacity="0.9"/>
                                         <path d="M0 400 L45 400 Q30 370 0 355 Z" fill="#ff69b4"/>
-                                        <!-- Bottom Right -->
                                         <path d="M400 400 L340 400 Q360 360 400 340 Z" fill="#c71585" opacity="0.9"/>
                                         <path d="M400 400 L355 400 Q370 370 400 355 Z" fill="#ff69b4"/>
                                     </g>
                                     
                                     <!-- Sparkles -->
-                                    <g id="sparkles" fill="#FFD700">
+                                    <g fill="#FFD700">
                                         <path d="M30 80 L32 85 L37 85 L33 88 L35 93 L30 90 L25 93 L27 88 L23 85 L28 85 Z"/>
                                         <path d="M370 120 L371 123 L374 123 L372 125 L373 128 L370 126 L367 128 L368 125 L366 123 L369 123 Z"/>
                                         <path d="M50 350 L51 352 L54 352 L52 354 L53 356 L50 355 L47 356 L48 354 L46 352 L49 352 Z"/>
@@ -94,48 +89,34 @@
                                     </g>
                                     
                                     <!-- Stars -->
-                                    <g id="stars">
+                                    <g>
                                         <polygon points="20,50 22,55 27,55 23,58 25,63 20,60 15,63 17,58 13,55 18,55" fill="#FFD700" opacity="0.8"/>
                                         <polygon points="380,70 381,73 384,73 382,74 383,77 381,75 379,77 380,74 378,73 381,73" fill="#FFD700" opacity="0.8"/>
                                         <polygon points="40,360 41,363 44,363 42,364 43,367 40,365 37,367 38,364 36,363 39,363" fill="#FFD700" opacity="0.8"/>
                                         <polygon points="360,340 362,344 367,344 364,346 365,349 362,347 359,349 360,346 358,344 361,344" fill="#FFD700" opacity="0.8"/>
                                     </g>
                                     
-                                    <!-- Heart decorations -->
-                                    <g id="hearts" fill="#ff69b4">
-                                        <path d="M25,25 C25,20 20,15 15,15 C10,15 5,20 5,25 C5,30 15,38 15,38 C15,38 25,30 25,25 Z" transform="scale(0.6) translate(15,15)"/>
-                                        <path d="M380,25 C380,20 375,15 370,15 C365,15 360,20 360,25 C360,30 370,38 370,38 C370,38 380,30 380,25 Z" transform="scale(0.6) translate(380,15)"/>
-                                        <path d="M25,380 C25,375 20,370 15,370 C10,370 5,375 5,380 C5,385 15,393 15,393 C15,393 25,385 25,380 Z" transform="scale(0.6) translate(15,365)"/>
-                                        <path d="M380,380 C380,375 375,370 370,370 C365,370 360,375 360,380 C360,385 370,393 370,393 C370,393 380,385 380,380 Z" transform="scale(0.6) translate(380,365)"/>
-                                    </g>
-                                    
                                     <!-- Age Text -->
                                     <text x="200" y="50" text-anchor="middle" fill="#c71585" font-family="Playfair Display" font-weight="700" font-size="32" class="age-text">18</text>
-                                    <text x="206" y="65" text-anchor="middle" font-family="Montserrat" font-weight="800" font-size="14" fill="#c71585" class="age-label">TUỔI</text>
+                                    <text x="206" y="65" text-anchor="middle" font-family="Montserrat" font-weight="800" font-size="14" fill="#c71585">TUẾI</text>
                                     
-                                    <!-- Bottom text - user age -->
-                                    <text x="200" y="380" text-anchor="middle" fill="#c71585" font-family="Montserrat" font-weight="700" font-size="16" class="age-label">
-                                        HAPPY 18TH BIRTHDAY
-                                    </text>
-                                    
-                                    <!-- Ribbon decorations -->
-                                    <path d="M0 180 Q50 160 80 180 T160 180 T240 180 T320 180 T400 170" stroke="#ff69b4" stroke-width="3" fill="none" opacity="0.5" stroke-dasharray="5,5"/>
-                                    <path d="M0 220 Q60 200 100 220 T180 220 T260 220 T340 220 T400 210" stroke="#c71585" stroke-width="2" fill="none" opacity="0.3" stroke-dasharray="8,4"/>
+                                    <!-- Bottom text -->
+                                    <text x="200" y="380" text-anchor="middle" fill="#c71585" font-family="Montserrat" font-weight="700" font-size="16">HAPPY 18TH BIRTHDAY</text>
                                 </svg>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Zoom Controls -->
-                    <div id="zoomControls" class="mt-4 flex items-center gap-3 mx-auto max-w-xs hidden">
-                        <button type="button" id="zoomOut" class="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-gray-100 transition" aria-label="Zoom out">
-                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div id="zoomControls" style="margin-top:1rem;display:none;align-items:center;gap:0.75rem;margin-left:auto;margin-right:auto;max-width:20rem;">
+                        <button type="button" id="zoomOut" style="width:2.5rem;height:2.5rem;border-radius:9999px;background:white;box-shadow:0 1px 3px rgba(0,0,0,0.1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;" aria-label="Zoom out">
+                            <svg style="width:1rem;height:1rem;color:#4b5563;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                             </svg>
                         </button>
-                        <input type="range" id="zoomSlider" min="10" max="300" value="100" step="1" class="flex-1 accent-[#c71585]">
-                        <button type="button" id="zoomIn" class="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-gray-100 transition" aria-label="Zoom in">
-                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <input type="range" id="zoomSlider" min="10" max="300" value="100" step="1" style="flex:1;accent-color:#c71585;">
+                        <button type="button" id="zoomIn" style="width:2.5rem;height:2.5rem;border-radius:9999px;background:white;box-shadow:0 1px 3px rgba(0,0,0,0.1);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;" aria-label="Zoom in">
+                            <svg style="width:1rem;height:1rem;color:#4b5563;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
                         </button>
@@ -143,36 +124,36 @@
                 </div>
                 
                 <!-- Upload Form -->
-                <div class="order-1 lg:order-2">
-                    <div class="bg-white rounded-2xl p-6 md:p-8 shadow-lg">
-                        <form id="uploadForm" class="space-y-6">
+                <div style="order:1;">
+                    <div style="background:white;border-radius:1rem;padding:1.5rem;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);">
+                        <form id="uploadForm">
                             <!-- Upload Zone -->
-                            <div class="form-group">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Ảnh của bạn</label>
-                                <div class="relative">
+                            <div style="margin-bottom:1.5rem;">
+                                <label style="display:block;font-size:0.875rem;font-weight:600;color:#374151;margin-bottom:0.5rem;">Ảnh của bạn</label>
+                                <div style="position:relative;">
                                     <label 
                                         for="inputImage" 
                                         id="dropZone"
-                                        class="zone-input-image block w-full h-48 rounded-xl border-2 border-dashed border-gray-300 cursor-pointer hover:border-[#c71585] hover:bg-pink-50 transition-all duration-200 flex flex-col items-center justify-center"
+                                        style="display:block;width:100%;height:12rem;border-radius:0.75rem;border:2px dashed #d1d5db;cursor:pointer;transition:all 0.2s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;"
                                     >
-                                        <div class="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mb-3 group-hover:bg-pink-200 transition" id="uploadIcon">
-                                            <svg class="w-8 h-8 text-[#c71585]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div style="width:4rem;height:4rem;border-radius:9999px;background:#fce7f3;display:flex;align-items:center;justify-content:center;margin-bottom:0.75rem;" id="uploadIcon">
+                                            <svg style="width:2rem;height:2rem;color:#c71585;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                             </svg>
                                         </div>
-                                        <p class="text-gray-500 font-medium text-sm" id="uploadText">Kéo và thả hoặc tải lên hình ảnh</p>
-                                        <p class="text-gray-400 text-xs mt-1">PNG, JPG, GIF (tối đa 10MB)</p>
+                                        <p style="color:#6b7280;font-weight:500;font-size:0.875rem;" id="uploadText">Kéo và thả hoặc tải lên hình ảnh</p>
+                                        <p style="color:#9ca3af;font-size:0.75rem;margin-top:0.25rem;">PNG, JPG, GIF (tối đa 10MB)</p>
                                     </label>
-                                    <input type="file" id="inputImage" accept="image/*" class="hidden">
+                                    <input type="file" id="inputImage" accept="image/*" style="display:none;">
                                     
                                     <!-- File preview -->
-                                    <div id="filePreview" class="hidden mt-2 flex items-center gap-2 p-2 bg-pink-50 rounded-lg">
-                                        <svg class="w-5 h-5 text-[#c71585]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div id="filePreview" style="display:none;margin-top:0.5rem;display:flex;align-items:center;gap:0.5rem;padding:0.5rem;background:#fdf2f8;border-radius:0.5rem;">
+                                        <svg style="width:1.25rem;height:1.25rem;color:#c71585;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                         </svg>
-                                        <span id="fileName" class="text-sm text-gray-700 flex-1 truncate">filename.jpg</span>
-                                        <button type="button" id="removeFile" class="w-6 h-6 rounded-full hover:bg-pink-200 flex items-center justify-center transition">
-                                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <span id="fileName" style="font-size:0.875rem;color:#374151;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">filename.jpg</span>
+                                        <button type="button" id="removeFile" style="width:1.5rem;height:1.5rem;border-radius:9999px;border:none;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                                            <svg style="width:1rem;height:1rem;color:#6b7280;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                             </svg>
                                         </button>
@@ -181,25 +162,25 @@
                             </div>
                             
                             <!-- Age Input -->
-                            <div class="form-group">
-                                <label for="inputAge" class="block text-sm font-semibold text-gray-700 mb-2">Tuổi rực rỡ</label>
+                            <div style="margin-bottom:1.5rem;">
+                                <label for="inputAge" style="display:block;font-size:0.875rem;font-weight:600;color:#374151;margin-bottom:0.5rem;">Tuổi rực rỡ</label>
                                 <input 
                                     type="text" 
                                     id="inputAge" 
                                     placeholder="Nhập tuổi của bạn" 
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#c71585] focus:ring-2 focus:ring-pink-200 outline-none transition"
+                                    style="width:100%;padding:0.75rem 1rem;border:1px solid #e5e7eb;border-radius:0.75rem;outline:none;transition:border-color 0.2s;"
                                 >
                             </div>
                             
                             <!-- Buttons -->
-                            <div class="grid grid-cols-2 gap-4 pt-2">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding-top:0.5rem;">
                                 <button 
                                     type="button" 
                                     id="btnPreview"
-                                    class="btn-primary flex items-center justify-center gap-2 py-3 px-4 bg-[#c71585] text-white rounded-xl font-semibold hover:bg-[#a0126a] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    style="padding:0.75rem 1rem;background:#c71585;color:white;border:none;border-radius:0.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;opacity:0.5;cursor:not-allowed;"
                                     disabled
                                 >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
@@ -208,10 +189,10 @@
                                 <button 
                                     type="button" 
                                     id="btnDownload"
-                                    class="btn-primary flex items-center justify-center gap-2 py-3 px-4 bg-[#c71585] text-white rounded-xl font-semibold hover:bg-[#a0126a] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    style="padding:0.75rem 1rem;background:#c71585;color:white;border:none;border-radius:0.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;opacity:0.5;cursor:not-allowed;"
                                     disabled
                                 >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v8m-4-4l4 4m-4-4l4-4M7 4h10M4 7h16"/>
                                     </svg>
                                     <span>Tải xuống</span>
@@ -225,36 +206,36 @@
     </main>
 
     <!-- Preview Modal -->
-    <div id="previewModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-4 md:p-6 max-w-lg w-full shadow-2xl">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Ảnh Review</h3>
-                <button type="button" id="closeModal" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div id="previewModal" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,0.75);z-index:50;align-items:center;justify-content:center;padding:1rem;">
+        <div style="background:white;border-radius:1rem;padding:1rem;max-width:32rem;width:100%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                <h3 style="font-size:1.25rem;font-weight:700;color:#1f2937;">Ảnh Review</h3>
+                <button type="button" id="closeModal" style="width:2rem;height:2rem;border-radius:9999px;border:none;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                    <svg style="width:1.25rem;height:1.25rem;color:#6b7280;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
-            <div class="relative w-full aspect-square overflow-hidden rounded-lg bg-[#fff1ea]">
-                <div id="modalImageContainer" class="w-full h-full flex items-center justify-center">
-                    <canvas id="modalCanvas" class="max-w-full max-h-full"></canvas>
+            <div style="position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;border-radius:0.5rem;background:#fff1ea;">
+                <div id="modalImageContainer" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                    <canvas id="modalCanvas" style="max-width:100%;max-height:100%;"></canvas>
                 </div>
             </div>
-            <div class="mt-4 flex items-center gap-3">
-                <button type="button" id="modalZoomOut" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition">
-                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div style="margin-top:1rem;display:flex;align-items:center;gap:0.75rem;">
+                <button type="button" id="modalZoomOut" style="width:2.5rem;height:2.5rem;border-radius:9999px;background:#f3f4f6;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                    <svg style="width:1rem;height:1rem;color:#4b5563;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                     </svg>
                 </button>
-                <input type="range" id="modalZoomSlider" min="10" max="300" value="100" step="1" class="flex-1 accent-[#c71585]">
-                <button type="button" id="modalZoomIn" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition">
-                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <input type="range" id="modalZoomSlider" min="10" max="300" value="100" step="1" style="flex:1;accent-color:#c71585;">
+                <button type="button" id="modalZoomIn" style="width:2.5rem;height:2.5rem;border-radius:9999px;background:#f3f4f6;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                    <svg style="width:1rem;height:1rem;color:#4b5563;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
                 </button>
             </div>
-            <button type="button" id="modalDownload" class="mt-4 w-full py-3 bg-[#c71585] text-white rounded-xl font-semibold hover:bg-[#a0126a] transition flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button type="button" id="modalDownload" style="margin-top:1rem;width:100%;padding:0.75rem;background:#c71585;color:white;border:none;border-radius:0.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+                <svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
                 <span>Tải ảnh xuống</span>
@@ -263,7 +244,7 @@
     </div>
 
     <!-- Hidden Canvas for Image Processing -->
-    <canvas id="processCanvas" class="hidden"></canvas>
+    <canvas id="processCanvas" style="display:none;"></canvas>
 
     <script src="app.js"></script>
 </body>
