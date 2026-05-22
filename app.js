@@ -1,495 +1,633 @@
-/**
- * RỰC RỠ TUỔI 18 - Birthday Frame App
- * Client-side image processing with Canvas API
- */
+// Birthday Frame App Module
+// Handles file upload, image preview with SVG frame overlay,
+// zoom controls, preview modal, and download of merged image.
 
-// ===== DOM Elements =====
-const dropZone = document.getElementById('dropZone');
-const inputImage = document.getElementById('inputImage');
-const userImage = document.getElementById('userImage');
-const imgAvatar = document.getElementById('imgAvatar');
-const placeholderText = document.getElementById('placeholderText');
-const filePreview = document.getElementById('filePreview');
-const fileName = document.getElementById('fileName');
-const removeFile = document.getElementById('removeFile');
-const inputAge = document.getElementById('inputAge');
-const btnPreview = document.getElementById('btnPreview');
-const btnDownload = document.getElementById('btnDownload');
-const zoomControls = document.getElementById('zoomControls');
-const zoomSlider = document.getElementById('zoomSlider');
-const zoomOut = document.getElementById('zoomOut');
-const zoomIn = document.getElementById('zoomIn');
-const previewModal = document.getElementById('previewModal');
-const closeModal = document.getElementById('closeModal');
-const modalImageContainer = document.getElementById('modalImageContainer');
-const modalCanvas = document.getElementById('modalCanvas');
-const modalZoomSlider = document.getElementById('modalZoomSlider');
-const modalZoomOut = document.getElementById('modalZoomOut');
-const modalZoomIn = document.getElementById('modalZoomIn');
-const modalDownload = document.getElementById('modalDownload');
-const processCanvas = document.getElementById('processCanvas');
+(function () {
+  'use strict';
 
-// ===== State =====
-let currentImage = null;
-let currentZoom = 100;
-let isDragging = false;
-let dragStart = { x: 0, y: 0 };
-let imageOffset = { x: 0, y: 0 };
-let modalZoom = 100;
-let showToastHandler = null;
+  // ============= Configuration =============
+  const CONFIG = {
+    MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+    ALLOWED_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
+    ALLOWED_EXTENSIONS: ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
+    ZOOM_MIN: 0.5,
+    ZOOM_MAX: 3.0,
+    ZOOM_STEP: 0.1,
+    DEFAULT_ZOOM: 1.0,
+  };
 
-// ===== Constants =====
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  // ============= State =============
+  let state = {
+    file: null,
+    imageUrl: null,
+    baseZoom: 1.0,
+    modalZoom: 1.0,
+    imgObj: null,
+    age: '',
+  };
 
-// ===== Event Listeners =====
+  // ============= DOM References =============
+  const refs = {}; // will be populated on init
 
-// Drop zone events
-dropZone.addEventListener('click', () => inputImage.click());
+  // ============= Utility Functions =============
 
-// Drag and drop
-dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropZone.classList.add('is-dragover');
-});
+  function $(id) {
+    return document.getElementById(id);
+  }
 
-dropZone.addEventListener('dragleave', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropZone.classList.remove('is-dragover');
-});
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
 
-dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropZone.classList.remove('is-dragover');
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-        handleFile(files[0]);
+  function getFileExtension(name) {
+    return name ? name.substring(name.lastIndexOf('.')).toLowerCase() : '';
+  }
+
+  function isValidFile(file) {
+    if (!file) return { valid: false, message: 'No file selected.' };
+
+    const ext = getFileExtension(file.name);
+    const typeValid =
+      CONFIG.ALLOWED_TYPES.includes(file.type) ||
+      CONFIG.ALLOWED_EXTENSIONS.includes(ext);
+
+    if (!typeValid) {
+      return {
+        valid: false,
+        message: 'Invalid file type. Please select an image (JPG, PNG, GIF, WebP).',
+      };
     }
-});
 
-// File input change
-inputImage.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-        handleFile(e.target.files[0]);
+    if (file.size > CONFIG.MAX_FILE_SIZE) {
+      return {
+        valid: false,
+        message: 'File is too large. Maximum size is 10MB.',
+      };
     }
-});
 
-// Remove file
-removeFile.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    resetImage();
-});
+    return { valid: true };
+  }
 
-// Preview button
-btnPreview.addEventListener('click', () => {
-    openPreview();
-});
-
-// Download button
-btnDownload.addEventListener('click', () => {
-    downloadImage('download');
-});
-
-// Close modal
-closeModal.addEventListener('click', () => {
-    closePreview();
-});
-
-// Modal download
-modalDownload.addEventListener('click', () => {
-    downloadImage('modal');
-});
-
-// Zoom controls
-zoomSlider.addEventListener('input', (e) => {
-    currentZoom = e.target.value;
-    applyZoom();
-});
-
-zoomOut.addEventListener('click', () => {
-    currentZoom = Math.max(10, currentZoom - 10);
-    zoomSlider.value = currentZoom;
-    applyZoom();
-});
-
-zoomIn.addEventListener('click', () => {
-    currentZoom = Math.min(300, parseInt(currentZoom) + 10);
-    zoomSlider.value = currentZoom;
-    applyZoom();
-});
-
-// Modal zoom
-modalZoomSlider.addEventListener('input', (e) => {
-    modalZoom = e.target.value;
-    const scale = modalZoom / 100;
-    modalCanvas.style.transform = `scale(${scale})`;
-});
-
-modalZoomOut.addEventListener('click', () => {
-    modalZoom = Math.max(10, modalZoom - 10);
-    modalZoomSlider.value = modalZoom;
-    const scale = modalZoom / 100;
-    modalCanvas.style.transform = `scale(${scale})`;
-});
-
-modalZoomIn.addEventListener('click', () => {
-    modalZoom = Math.min(300, parseInt(modalZoom) + 10);
-    modalZoomSlider.value = modalZoom;
-    const scale = modalZoom / 100;
-    modalCanvas.style.transform = `scale(${scale})`;
-});
-
-// Close modal on backdrop click
-previewModal.addEventListener('click', (e) => {
-    if (e.target === previewModal) {
-        closePreview();
+  function toast(message, type = 'error') {
+    let toastEl = document.querySelector('.bf-toast');
+    if (!toastEl) {
+      toastEl = document.createElement('div');
+      toastEl.className = 'bf-toast';
+      toastEl.style.cssText =
+        'position:fixed;bottom:16px;right:16px;padding:12px 20px;border-radius:8px;' +
+        'font-size:14px;z-index:9999;transition:opacity 0.3s ease;opacity:0;';
+      document.body.appendChild(toastEl);
     }
-});
 
-// Keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !previewModal.classList.contains('hidden')) {
-        closePreview();
-    }
-});
+    const bgColor = type === 'success' ? '#10B981' : type === 'info' ? '#3B82F6' : '#EF4444';
+    const textColor = '#ffffff';
+    toastEl.textContent = message;
+    toastEl.style.backgroundColor = bgColor;
+    toastEl.style.color = textColor;
+    toastEl.style.opacity = '1';
 
-// Drag functionality for image moving
-imgAvatar.addEventListener('mousedown', (e) => {
-    if (!currentImage) return;
-    isDragging = true;
-    dragStart = { x: e.clientX - imageOffset.x, y: e.clientY - imageOffset.y };
-    imgAvatar.style.cursor = 'grabbing';
-});
+    // auto-hide after 3s
+    if (toastEl._hideTimeout) clearTimeout(toastEl._hideTimeout);
+    toastEl._hideTimeout = setTimeout(() => {
+      toastEl.style.opacity = '0';
+    }, 3000);
+  }
 
-document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    imageOffset = {
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
-    };
-    applyZoom();
-});
+  // ============= Image Processing =============
 
-document.addEventListener('mouseup', () => {
-    isDragging = false;
-    imgAvatar.style.cursor = 'default';
-});
-
-// ===== Functions =====
-
-/**
- * Handle uploaded file
- */
-function handleFile(file) {
-    // Validate file type
-    if (!ACCEPTED_TYPES.includes(file.type)) {
-        showToast('Vui lòng chọn tệp hình ảnh (JPG, PNG, GIF)', 'error');
-        return;
-    }
-    
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-        showToast('Ảnh vượt quá 10MB. Vui lòng chọn ảnh nhỏ hơn.', 'error');
-        return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-            currentImage = img;
-            displayImage(img);
-            showFilePreview(file.name);
-            enableButtons();
-            zoomControls.classList.remove('hidden');
-            showToast('Ảnh đã tải lên thành công!', 'success');
-        };
-        img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-}
-
-/**
- * Display image in preview area
- */
-function displayImage(img) {
-    userImage.src = img.src;
-    userImage.classList.remove('hidden');
-    placeholderText.classList.add('hidden');
-    updateImagePosition();
-}
-
-/**
- * Show file preview info
- */
-function showFilePreview(name) {
-    fileName.textContent = name;
-    filePreview.classList.remove('hidden');
-    dropZone.querySelector('.text').textContent = 'Thay đổi ảnh';
-}
-
-/**
- * Reset image state
- */
-function resetImage() {
-    currentImage = null;
-    userImage.src = '';
-    userImage.classList.add('hidden');
-    placeholderText.classList.remove('hidden');
-    filePreview.classList.add('hidden');
-    inputImage.value = '';
-    dropZone.querySelector('.text').textContent = 'Kéo và thả hoặc tải lên hình ảnh';
-    disableButtons();
-    zoomControls.classList.add('hidden');
-    imageOffset = { x: 0, y: 0 };
-    currentZoom = 100;
-    zoomSlider.value = 100;
-}
-
-/**
- * Enable action buttons
- */
-function enableButtons() {
-    btnPreview.disabled = false;
-    btnDownload.disabled = false;
-}
-
-/**
- * Disable action buttons
- */
-function disableButtons() {
-    btnPreview.disabled = true;
-    btnDownload.disabled = true;
-}
-
-/**
- * Apply zoom transformation
- */
-function applyZoom() {
-    if (!currentImage) return;
-    const scale = currentZoom / 100;
-    const imageElement = userImage;
-    imageElement.style.transform = `translate(${imageOffset.x}px, ${imageOffset.y}px) scale(${scale})`;
-}
-
-/**
- * Update image position and size
- */
-function updateImagePosition() {
-    if (!currentImage) return;
-    applyZoom();
-}
-
-// ===== SVG Frame Data =====
-const svgFrameContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
-    <defs>
-        <pattern id="bgPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-            <rect width="40" height="40" fill="#c71585" opacity="0.05"/>
-            <circle cx="10" cy="10" r="2" fill="#c71585" opacity="0.15"/>
-            <circle cx="30" cy="30" r="2" fill="#c71585" opacity="0.15"/>
-        </pattern>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#bgPattern)"/>
-    <g id="corners">
-        <path d="M0 0 L60 0 Q40 40 0 60 Z" fill="#c71585" opacity="0.9"/>
-        <path d="M0 0 L45 0 Q30 30 0 45 Z" fill="#ff69b4"/>
-        <path d="M400 0 L340 0 Q360 40 400 60 Z" fill="#c71585" opacity="0.9"/>
-        <path d="M400 0 L355 0 Q370 30 400 45 Z" fill="#ff69b4"/>
-        <path d="M0 400 L60 400 Q40 360 0 340 Z" fill="#c71585" opacity="0.9"/>
-        <path d="M0 400 L45 400 Q30 370 0 355 Z" fill="#ff69b4"/>
-        <path d="M400 400 L340 400 Q360 360 400 340 Z" fill="#c71585" opacity="0.9"/>
-        <path d="M400 400 L355 400 Q370 370 400 355 Z" fill="#ff69b4"/>
-    </g>
-    <g fill="#FFD700">
-        <path d="M30 80 L32 85 L37 85 L33 88 L35 93 L30 90 L25 93 L27 88 L23 85 L28 85 Z"/>
-        <path d="M370 120 L371 123 L374 123 L372 125 L373 128 L370 126 L367 128 L368 125 L366 123 L369 123 Z"/>
-        <path d="M50 350 L51 352 L54 352 L52 354 L53 356 L50 355 L47 356 L48 354 L46 352 L49 352 Z"/>
-        <path d="M350 370 L352 373 L357 373 L354 375 L355 378 L352 376 L349 378 L350 375 L348 373 L351 373 Z"/>
-    </g>
-    <text x="200" y="50" text-anchor="middle" fill="#c71585" font-family="serif" font-weight="700" font-size="32">18</text>
-    <text x="200" y="75" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="14" fill="#c71585">TUỔI</text>
-    <text x="200" y="380" text-anchor="middle" fill="#c71585" font-family="sans-serif" font-weight="700" font-size="16">HAPPY 18TH BIRTHDAY</text>
-    <path d="M0 180 Q50 160 80 180 T160 180 T240 180 T320 180 T400 170" stroke="#ff69b4" stroke-width="3" fill="none" opacity="0.5" stroke-dasharray="5,5"/>
-    <path d="M0 220 Q60 200 100 220 T180 220 T260 220 T340 220 T400 210" stroke="#c71585" stroke-width="2" fill="none" opacity="0.3" stroke-dasharray="8,4"/>
-</svg>`;
-
-/**
- * Open preview modal with rendered image
- */
-function openPreview() {
-    if (!currentImage) return;
-    
-    renderMergedImage(modalCanvas, 'modal').then(() => {
-        previewModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-        modalZoom = 100;
-        modalZoomSlider.value = 100;
-        modalCanvas.style.transform = 'scale(1)';
+  function loadImage(imageUrl) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Failed to load image.'));
+      img.src = imageUrl;
     });
-}
+  }
 
-/**
- * Close preview modal
- */
-function closePreview() {
-    previewModal.classList.add('hidden');
-    document.body.style.overflow = '';
-}
+  function syncImageSize() {
+    const avatar = refs.imgAvatar;
+    const image = refs.userImage;
+    if (!avatar || !image) return;
+    image.style.width = avatar.clientWidth + 'px';
+    image.style.height = avatar.clientHeight + 'px';
+  }
 
-/**
- * Render merged image (user photo + SVG overlay)
- */
-async function renderMergedImage(canvas, context = 'preview') {
-    return new Promise((resolve) => {
-        const size = 400; // Output size
-        canvas.width = size;
-        canvas.height = size;
-        
-        const ctx = canvas.getContext('2d');
-        
-        // Background
-        ctx.fillStyle = '#fff1ea';
-        ctx.fillRect(0, 0, size, size);
-        
-        // Draw user image
-        if (currentImage) {
-            const scale = currentZoom / 100;
-            const scaledWidth = size / scale;
-            const scaledHeight = size / scale;
-            const x = (size - scaledWidth) / 2 + imageOffset.x;
-            const y = (size - scaledHeight) / 2 + imageOffset.y;
-            
-            ctx.drawImage(currentImage, x, y, scaledWidth, scaledHeight);
-        }
-        
-        // Draw SVG overlay
-        const img = new Image();
-        const svgBlob = new Blob([svgFrameContent], { type: 'image/svg+xml' });
-        const url = URL.createObjectURL(svgBlob);
-        
-        img.onload = () => {
-            ctx.drawImage(img, 0, 0, size, size);
-            URL.revokeObjectURL(url);
-            resolve();
-        };
-        
-        img.src = url;
-    });
-}
+  // ============= SVG Frame Handling =============
 
-/**
- * Download merged image
- */
-async function downloadImage(context = 'download') {
-    if (!currentImage) return;
-    
-    const button = context === 'download' ? btnDownload : modalDownload;
-    const originalText = button.querySelector('span')?.textContent || button.textContent;
-    
-    // Show loading
-    button.disabled = true;
-    if (button.querySelector('span')) {
-        button.querySelector('span').textContent = 'Đang xử lý...';
+  /**
+   * Returns the resolved SVG string of the frame.
+   * Expects frame element to exist, contains <svg> or is an <img> with .svg.
+   * This builder looks for an #frame element (or an element with data-frame role)
+   * and returns a standard SVG overlay.
+   */
+  function getFrameSvg() {
+    // 1. Prefer explicit <svg id="frame">
+    const frameSvg = document.getElementById('frame');
+    if (frameSvg && frameSvg.tagName.toLowerCase() === 'svg') {
+      return new XMLSerializer().serializeToString(frameSvg);
     }
-    
+
+    // 2. Fallback: if there's an <img> with SVG src
+    const frameImg = document.getElementById('frame');
+    if (frameImg && frameImg.tagName.toLowerCase() === 'img') {
+      // This requires the SVG loaded in DOM or known source.
+      // We'll try to fetch it, but for synchronous purposes, fallback to a basic frame
+      return null;
+    }
+
+    // 3. Default frame (a simple birthday frame)
+    const w = 400;
+    const h = 400;
+    const ageText = state.age || '';
+    return (
+      '<svg xmlns="http://www.w3.org/2000/svg" width="' +
+      w +
+      '" height="' +
+      h +
+      '" viewBox="0 0 ' +
+      w +
+      ' ' +
+      h +
+      '">' +
+      '<rect x="10" y="10" width="' +
+      (w - 20) +
+      '" height="' +
+      (h - 20) +
+      '" rx="12" fill="none" stroke="#fbbf24" stroke-width="20"/>' +
+      (ageText
+        ? '<text x="50%" y="30" dominant-baseline="middle" text-anchor="middle" fill="#fbbf24" font-size="24" font-family="Arial, sans-serif" font-weight="bold">' +
+          escapeXml(ageText) +
+          '</text>'
+        : '') +
+      '<text x="50%" y="' +
+      (h - 30) +
+      '" dominant-baseline="middle" text-anchor="middle" fill="#fbbf24" font-size="16" font-family="Arial, sans-serif">' +
+      escapeXml('Happy Birthday! 🎉') +
+      '</text>' +
+      '</svg>'
+    );
+  }
+
+  function escapeXml(text) {
+    if (typeof text !== 'string') return '';
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  // ============= Core Feature: Upload =============
+
+  function handleFileSelect(file) {
+    const validation = isValidFile(file);
+    if (!validation.valid) {
+      toast(validation.message, 'error');
+      return;
+    }
+
+    state.file = file;
+    state.baseZoom = CONFIG.DEFAULT_ZOOM;
+    state.modalZoom = CONFIG.DEFAULT_ZOOM;
+
+    if (state.imageUrl) {
+      URL.revokeObjectURL(state.imageUrl);
+    }
+    state.imageUrl = URL.createObjectURL(file);
+
+    // Update UI
+    refs.filePreview.style.display = '';
+    refs.fileName.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
+    refs.placeholderText.style.display = 'none';
+    refs.zoomControls.style.display = '';
+    refs.userImage.style.display = 'block';
+
+    // Enable buttons
+    refs.btnPreview.disabled = false;
+    refs.btnDownload.disabled = false;
+
+    // Reset zoom slider
+    refs.zoomSlider.value = state.baseZoom;
+
+    // Set image source
+    refs.userImage.setAttribute('src', state.imageUrl);
+
+    // Load image for state.imgObj
+    loadImage(state.imageUrl)
+      .then((img) => {
+        state.imgObj = img;
+        syncImageSize();
+        applyBaseZoom();
+      })
+      .catch((err) => {
+        toast('Failed to load image: ' + (err && err.message ? err.message : 'Unknown error'), 'error');
+      });
+  }
+
+  function clearFile() {
+    if (state.imageUrl) {
+      URL.revokeObjectURL(state.imageUrl);
+    }
+    state.file = null;
+    state.imageUrl = null;
+    state.imgObj = null;
+
+    refs.filePreview.style.display = 'none';
+    refs.placeholderText.style.display = '';
+    refs.zoomControls.style.display = 'none';
+    refs.userImage.style.display = 'none';
+    refs.userImage.removeAttribute('src');
+
+    refs.btnPreview.disabled = true;
+    refs.btnDownload.disabled = true;
+
+    refs.inputImage.value = '';
+
+    state.baseZoom = CONFIG.DEFAULT_ZOOM;
+    refs.zoomSlider.value = state.baseZoom;
+    applyBaseZoom();
+  }
+
+  // ============= Zoom Logic =============
+
+  function applyBaseZoom() {
+    if (!state.imgObj) return;
+    const zoom = parseFloat(refs.zoomSlider.value) || 1.0;
+    state.baseZoom = zoom;
+    if (refs.userImage) {
+      refs.userImage.style.transform = 'scale(' + zoom + ')';
+    }
+  }
+
+  function changeZoom(delta) {
+    let newZoom = parseFloat(refs.zoomSlider.value) + delta;
+    newZoom = Math.max(CONFIG.ZOOM_MIN, Math.min(CONFIG.ZOOM_MAX, newZoom));
+    refs.zoomSlider.value = newZoom.toFixed(2);
+    applyBaseZoom();
+  }
+
+  // ============= Canvas Merge Logic =============
+
+  /**
+   * Renders user image + frame overlay into a canvas.
+   * Returns { canvas, ctx }.
+   */
+  async function renderMergedToCanvas(targetCanvas, opts = {}) {
+    opts = Object.assign({ width: 512, height: 512, zoom: 1.0, fillBg: null }, opts);
+
+    const canvas = targetCanvas || document.createElement('canvas');
+    const w = (canvas.width = opts.width);
+    const h = (canvas.height = opts.height);
+    const ctx = canvas.getContext('2d');
+
+    // Background fill
+    if (opts.fillBg) {
+      ctx.fillStyle = opts.fillBg;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // Draw user image centered and scaled by zoom
+    if (state.imgObj) {
+      const img = state.imgObj;
+      const zoom = opts.zoom || 1.0;
+      const iw = img.naturalWidth || img.width;
+      const ih = img.naturalHeight || img.height;
+
+      // "Cover" approach within canvas while allowing zoom adjustment
+      const canvasAspect = w / h;
+      const imgAspect = iw / ih;
+      let drawW,
+        drawH,
+        sx = 0,
+        sy = 0;
+
+      if (imgAspect > canvasAspect) {
+        drawH = h / zoom;
+        drawW = drawH * imgAspect;
+        sx = -(drawW - w) / 2;
+        sy = -(drawH - h) / 2;
+      } else {
+        drawW = w / zoom;
+        drawH = drawW / imgAspect;
+        sx = -(drawW - w) / 2;
+        sy = -(drawH - h) / 2;
+      }
+
+      // Draw clipped to canvas area (cover with no blank spaces)
+      const scale = Math.max(w / (iw * zoom), h / (ih * zoom));
+      drawW = iw * scale * zoom;
+      drawH = ih * scale * zoom;
+      sx = (w - drawW) / 2;
+      sy = (h - drawH) / 2;
+
+      ctx.drawImage(img, sx, sy, drawW, drawH);
+    }
+
+    // Draw Frame SVG
+    const svgData = getFrameSvg();
+    if (svgData) {
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const frameImg = new Image();
+      await new Promise((resolve, reject) => {
+        frameImg.onload = resolve;
+        frameImg.onerror = () => {
+          reject(new Error('Failed to load frame'));
+        };
+        frameImg.src = url;
+      });
+
+      ctx.drawImage(frameImg, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+    }
+
+    return { canvas, ctx };
+  }
+
+  // ============= Preview Modal =============
+
+  async function openPreview() {
+    if (!state.imgObj) {
+      toast('Please upload an image first.', 'error');
+      return;
+    }
+
+    refs.previewModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // Render initial view
     try {
-        const canvas = context === 'download' ? processCanvas : modalCanvas;
-        await renderMergedImage(canvas, context);
-        
-        // Convert to blob and download
-        canvas.toBlob((blob) => {
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `birthday-frame-${inputAge.value || '18'}-${Date.now()}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            showToast('Tải ảnh thành công!', 'success');
-        }, 'image/jpeg', 0.95);
-    } catch (error) {
-        console.error('Download error:', error);
-        showToast('Có lỗi khi tải ảnh. Vui lòng thử lại.', 'error');
-    } finally {
-        button.disabled = false;
-        if (button.querySelector('span')) {
-            button.querySelector('span').textContent = originalText;
+      await renderModalPreview();
+    } catch (err) {
+      toast('Failed to render preview: ' + (err && err.message ? err.message : 'Unknown error'), 'error');
+    }
+  }
+
+  function closePreview() {
+    refs.previewModal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  async function renderModalPreview() {
+    const canvas = refs.modalCanvas;
+    const container = canvas.parentElement;
+    const rect = container.getBoundingClientRect();
+    const size = Math.max(1, Math.min(rect.width, rect.height));
+
+    await renderMergedToCanvas(canvas, {
+      width: size,
+      height: size,
+      zoom: state.modalZoom,
+    });
+  }
+
+  // ============= Download =============
+
+  async function performDownload(canvas, filename) {
+    const link = document.createElement('a');
+    link.download = filename || 'birthday-frame.jpg';
+    link.href = canvas.toDataURL('image/jpeg', 0.92);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  async function onClickDownload() {
+    if (!state.imgObj) {
+      toast('Please upload an image first.', 'error');
+      return;
+    }
+    try {
+      const { canvas } = await renderMergedToCanvas(refs.processCanvas, {
+        width: 1024,
+        height: 1024,
+        zoom: state.baseZoom,
+      });
+      await performDownload(canvas, 'my-birthday-frame.jpg');
+      toast('Image downloaded successfully!', 'success');
+    } catch (err) {
+      toast('Download failed: ' + (err && err.message ? err.message : 'Unknown error'), 'error');
+    }
+  }
+
+  async function onModalDownload() {
+    if (!state.imgObj) return;
+    try {
+      const { canvas } = await renderMergedToCanvas(refs.processCanvas, {
+        width: 1024,
+        height: 1024,
+        zoom: state.modalZoom,
+      });
+      await performDownload(canvas, 'my-birthday-frame.jpg');
+      toast('Image downloaded successfully!', 'success');
+    } catch (err) {
+      toast('Download failed: ' + (err && err.message ? err.message : 'Unknown error'), 'error');
+    }
+  }
+
+  // ============= Event Listeners =============
+
+  function initEvents() {
+    // Drop zone click (open file picker)
+    refs.dropZone.addEventListener('click', (e) => {
+      if (e.target !== refs.inputImage && !refs.inputImage.contains(e.target) && !refs.removeFile.contains(e.target)) {
+        refs.inputImage.click();
+      }
+    });
+
+    // Drag & Drop on drop zone
+    refs.dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      refs.dropZone.classList.add('dragover');
+    });
+
+    refs.dropZone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      refs.dropZone.classList.remove('dragover');
+    });
+
+    refs.dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      refs.dropZone.classList.remove('dragover');
+      const dt = e.dataTransfer;
+      const files = dt ? dt.files : null;
+      if (files && files.length) handleFileSelect(files[0]);
+    });
+
+    // File input change
+    refs.inputImage.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length) handleFileSelect(e.target.files[0]);
+    });
+
+    // Remove file
+    refs.removeFile.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      clearFile();
+    });
+
+    // Age input
+    refs.inputAge.addEventListener('input', (e) => {
+      state.age = e.target.value;
+    });
+
+    // Preview button
+    refs.btnPreview.addEventListener('click', (e) => {
+      e.preventDefault();
+      openPreview();
+    });
+
+    // Download button
+    refs.btnDownload.addEventListener('click', (e) => {
+      e.preventDefault();
+      onClickDownload();
+    });
+
+    // Zoom controls
+    refs.zoomSlider.addEventListener('input', () => {
+      applyBaseZoom();
+    });
+    refs.zoomIn.addEventListener('click', () => changeZoom(CONFIG.ZOOM_STEP));
+    refs.zoomOut.addEventListener('click', () => changeZoom(-CONFIG.ZOOM_STEP));
+
+    // Modal zoom controls
+    refs.modalZoomSlider.addEventListener('input', async () => {
+      state.modalZoom = parseFloat(refs.modalZoomSlider.value) || 1.0;
+      try {
+        await renderModalPreview();
+      } catch (err) {
+        toast('Preview update failed.', 'error');
+      }
+    });
+    refs.modalZoomIn.addEventListener('click', async () => {
+      let z = parseFloat(refs.modalZoomSlider.value) + CONFIG.ZOOM_STEP;
+      z = Math.max(CONFIG.ZOOM_MIN, Math.min(CONFIG.ZOOM_MAX, z));
+      refs.modalZoomSlider.value = z.toFixed(2);
+      state.modalZoom = z;
+      try {
+        await renderModalPreview();
+      } catch (err) {
+        toast('Preview update failed.', 'error');
+      }
+    });
+    refs.modalZoomOut.addEventListener('click', async () => {
+      let z = parseFloat(refs.modalZoomSlider.value) - CONFIG.ZOOM_STEP;
+      z = Math.max(CONFIG.ZOOM_MIN, Math.min(CONFIG.ZOOM_MAX, z));
+      refs.modalZoomSlider.value = z.toFixed(2);
+      state.modalZoom = z;
+      try {
+        await renderModalPreview();
+      } catch (err) {
+        toast('Preview update failed.', 'error');
+      }
+    });
+
+    // Close modal
+    refs.closeModal.addEventListener('click', (e) => {
+      e.preventDefault();
+      closePreview();
+    });
+
+    // Click outside modal content to close
+    refs.previewModal.addEventListener('click', (e) => {
+      if (e.target === refs.previewModal) closePreview();
+    });
+
+    // Modal download
+    refs.modalDownload.addEventListener('click', (e) => {
+      e.preventDefault();
+      onModalDownload();
+    });
+
+    // Keyboard shortcuts for modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && refs.previewModal.style.display === 'flex') {
+        closePreview();
+      }
+    });
+
+    // Window resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        syncImageSize();
+        // Re-render modal if open
+        if (refs.previewModal.style.display === 'flex') {
+          renderModalPreview().catch(() => {});
         }
+      }, 150);
+    });
+  }
+
+  // ============= Initialize =============
+
+  function init() {
+    // Collect refs
+    const ids = [
+      'dropZone',
+      'inputImage',
+      'userImage',
+      'imgAvatar',
+      'placeholderText',
+      'filePreview',
+      'fileName',
+      'removeFile',
+      'inputAge',
+      'btnPreview',
+      'btnDownload',
+      'zoomControls',
+      'zoomSlider',
+      'zoomIn',
+      'zoomOut',
+      'previewModal',
+      'closeModal',
+      'modalCanvas',
+      'modalZoomSlider',
+      'modalZoomIn',
+      'modalZoomOut',
+      'modalDownload',
+      'processCanvas',
+    ];
+    for (const id of ids) {
+      refs[id] = $(id);
     }
-}
 
-/**
- * Show toast notification
- */
-function showToast(message, type = 'success') {
-    // Remove existing toast
-    if (showToastHandler) {
-        clearTimeout(showToastHandler);
-        document.querySelector('.toast')?.remove();
+    // Set initial state UI
+    if (refs.dropZone) refs.dropZone.style.cursor = 'pointer';
+    if (refs.btnPreview) refs.btnPreview.disabled = true;
+    if (refs.btnDownload) refs.btnDownload.disabled = true;
+    if (refs.filePreview) refs.filePreview.style.display = 'none';
+    if (refs.zoomControls) refs.zoomControls.style.display = 'none';
+    if (refs.previewModal) refs.previewModal.style.display = 'none';
+    if (refs.zoomSlider) {
+      refs.zoomSlider.min = CONFIG.ZOOM_MIN;
+      refs.zoomSlider.max = CONFIG.ZOOM_MAX;
+      refs.zoomSlider.step = CONFIG.ZOOM_STEP;
+      refs.zoomSlider.value = CONFIG.DEFAULT_ZOOM;
     }
-    
-    // Create toast
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    // Auto remove
-    showToastHandler = setTimeout(() => {
-        toast.remove();
-    }, 3300);
-}
-
-// ===== Age input effect =====
-inputAge.addEventListener('input', (e) => {
-    const age = e.target.value.replace(/\D/g, '');
-    e.target.value = age;
-    
-    // Could update frame SVG age text in real-time
-    // For now, just show what's there
-});
-
-inputAge.addEventListener('blur', () => {
-    if (currentImage) {
-        updateImagePosition();
+    if (refs.modalZoomSlider) {
+      refs.modalZoomSlider.min = CONFIG.ZOOM_MIN;
+      refs.modalZoomSlider.max = CONFIG.ZOOM_MAX;
+      refs.modalZoomSlider.step = CONFIG.ZOOM_STEP;
+      refs.modalZoomSlider.value = CONFIG.DEFAULT_ZOOM;
     }
-});
 
-// ===== Initialization =====
-window.addEventListener('DOMContentLoaded', () => {
-    // Check for URL parameters (optional sharing)
-    const urlParams = new URLSearchParams(window.location.search);
-    const sharedAge = urlParams.get('age');
-    if (sharedAge) {
-        inputAge.value = sharedAge;
-    }
-});
+    initEvents();
+  }
 
-// ===== CSS-in-JS for dynamic styles (if needed) =====
-function injectDynamicStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
-        .toast + .toast {
-            bottom: 80px;
-        }
-    `;
-    document.head.appendChild(style);
-}
-injectDynamicStyles();
-
-// Export for potential testing
-window.birthdayApp = {
-    handleFile,
-    resetImage,
-    downloadImage,
-    openPreview,
-    closePreview
-};
+  // Run when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
