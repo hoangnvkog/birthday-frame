@@ -1,6 +1,6 @@
 /**
- * Birthday Frame App
- * Handles: Upload, Preview, Canvas Rendering, Zoom/Pan, Download
+ * Birthday Frame App v2.0
+ * Handles: Upload, Preview, Canvas Rendering, Zoom/Pan, Download with Frame Overlay
  */
 
 // ===== DOM Elements =====
@@ -34,13 +34,35 @@ const canvas = document.getElementById('canvasLayer');
 
 // ===== State =====
 let uploadedFile = null;
-let imageData = null;
 let zoomLevel = 100;
 let offsetX = 0;
 let offsetY = 0;
 let isDragging = false;
 let startX, startY;
 let imgSrc = null;
+let frameSvgBlobUrl = null;
+let isFrameReady = false;
+
+// ===== Load Frame SVG via Fetch =====
+async function loadFrameSvg() {
+    try {
+        const response = await fetch('bg-opt1.svg');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        const svgText = await response.text();
+        
+        // Create Blob from SVG text
+        const blob = new Blob([svgText], { type: 'image/svg+xml' });
+        frameSvgBlobUrl = URL.createObjectURL(blob);
+        isFrameReady = true;
+        
+        console.log('✅ Frame SVG loaded successfully');
+    } catch (error) {
+        console.error('❌ Failed to load frame SVG:', error);
+        showToast('Không thể tải frame overlay', 'error');
+    }
+}
 
 // ===== Event Listeners =====
 fileInput.addEventListener('change', handleFileSelect);
@@ -127,7 +149,7 @@ function processFile(file) {
         userImage.src = imgSrc;
         userImage.classList.remove('hidden');
         userImage.onload = () => {
-            updateCanvas();
+            updateCanvasWithZoom();
             showPreview();
         };
     };
@@ -165,7 +187,7 @@ function showPreview() {
     zoomControls.classList.remove('hidden');
 }
 
-function updateCanvas() {
+function updateCanvasWithZoom() {
     if (!imgSrc) return;
     
     const ctx = canvas.getContext('2d');
@@ -175,12 +197,18 @@ function updateCanvas() {
         canvas.height = 400;
         
         // Calculate cover fit
-        const scale = Math.max(400 / img.width, 400 / img.height);
-        const x = (400 - img.width * scale) / 2;
-        const y = (400 - img.height * scale) / 2;
+        const coverScale = Math.max(400 / img.width, 400 / img.height);
+        const x = (400 - img.width * coverScale) / 2 + offsetX;
+        const y = (400 - img.height * coverScale) / 2 + offsetY;
         
-        ctx.clearRect(0, 0, 400, 400);
-        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+        const zoomScale = zoomLevel / 100;
+        
+        ctx.save();
+        ctx.translate(200, 200);
+        ctx.scale(zoomScale, zoomScale);
+        ctx.translate(-200, -200);
+        ctx.drawImage(img, x, y, img.width * coverScale, img.height * coverScale);
+        ctx.restore();
     };
     img.src = imgSrc;
 }
@@ -194,6 +222,7 @@ function handleZoom(e) {
 function adjustZoom(delta) {
     zoomLevel = Math.max(50, Math.min(200, zoomLevel + delta));
     zoomSlider.value = zoomLevel;
+    modalZoomSlider.value = zoomLevel;
     applyZoom();
 }
 
@@ -202,30 +231,6 @@ function applyZoom() {
     const scale = zoomLevel / 100;
     userImage.style.transform = `scale(${scale}) translate(${offsetX}px, ${offsetY}px)`;
     updateCanvasWithZoom();
-}
-
-function updateCanvasWithZoom() {
-    if (!imgSrc) return;
-    
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    img.onload = () => {
-        canvas.width = 400;
-        canvas.height = 400;
-        
-        const scale = zoomLevel / 100;
-        ctx.save();
-        ctx.scale(scale, scale);
-        ctx.translate(offsetX, offsetY);
-        
-        const coverScale = Math.max(400 / img.width, 400 / img.height);
-        const x = (400 - img.width * coverScale) / 2;
-        const y = (400 - img.height * coverScale) / 2;
-        
-        ctx.drawImage(img, x, y, img.width * coverScale, img.height * coverScale);
-        ctx.restore();
-    };
-    img.src = imgSrc;
 }
 
 // ===== Drag/Pan =====
@@ -310,7 +315,7 @@ function renderFinalCanvas(targetCanvas) {
             ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
             ctx.restore();
             
-            // After drawing image, draw frame overlay
+            // Draw frame overlay AFTER image
             drawFrame(ctx, size);
         };
         img.onerror = () => {
@@ -323,17 +328,25 @@ function renderFinalCanvas(targetCanvas) {
     }
 }
 
+// ===== Draw Frame using Blob URL =====
 function drawFrame(ctx, size) {
+    if (!isFrameReady || !frameSvgBlobUrl) {
+        console.warn('Frame SVG chưa được tải hoặc chưa sẵn sàng');
+        return;
+    }
+    
     const frameImg = new Image();
     frameImg.onload = () => {
         ctx.drawImage(frameImg, 0, 0, size, size);
+        console.log('✅ Frame drawn successfully');
     };
     frameImg.onerror = () => {
-        console.warn('Không thể tải frame SVG');
+        console.warn('❌ Không thể vẽ frame SVG');
     };
-    frameImg.src = 'bg-opt1.svg';
+    frameImg.src = frameSvgBlobUrl;
 }
 
+// ===== Modal Zoom =====
 function handleModalZoom(e) {
     zoomLevel = parseInt(e.target.value);
     modalZoomSlider.value = zoomLevel;
@@ -352,7 +365,15 @@ function adjustModalZoom(delta) {
 
 // ===== Download =====
 function downloadImage() {
-    if (!imgSrc) return;
+    if (!imgSrc) {
+        showToast('Vui lòng tải ảnh trước', 'error');
+        return;
+    }
+    
+    if (!isFrameReady) {
+        showToast('Frame đang được tải, vui lòng đợi...', 'error');
+        return;
+    }
     
     const downloadCanvas = document.createElement('canvas');
     downloadCanvas.width = 1200;
@@ -379,8 +400,8 @@ function downloadImage() {
             ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
             ctx.restore();
             
-            // After drawing image, draw frame overlay (high quality)
-            drawFrameHQ(ctx, 1200);
+            // Draw frame overlay (high quality)
+            drawFrameHQ(ctx, 1200, downloadCanvas);
         };
         img.onerror = () => {
             showToast('Lỗi vẽ ảnh tải xuống', 'error');
@@ -389,7 +410,12 @@ function downloadImage() {
     }
 }
 
-function drawFrameHQ(ctx, size) {
+function drawFrameHQ(ctx, size, targetCanvas) {
+    if (!isFrameReady || !frameSvgBlobUrl) {
+        console.warn('Frame SVG chưa sẵn sàng cho download');
+        return;
+    }
+    
     const frameImg = new Image();
     frameImg.onload = () => {
         ctx.drawImage(frameImg, 0, 0, size, size);
@@ -397,20 +423,20 @@ function drawFrameHQ(ctx, size) {
         // Trigger download after frame is drawn
         const link = document.createElement('a');
         link.download = `birthday-frame-${Date.now()}.png`;
-        link.href = downloadCanvas.toDataURL('image/png');
+        link.href = targetCanvas.toDataURL('image/png');
         link.click();
         showToast('Đã tải ảnh thành công!', 'success');
     };
     frameImg.onerror = () => {
-        console.warn('Không thể tải frame SVG cho download');
-        // Download without frame if frame fails
+        console.warn('❌ Không thể vẽ frame SVG cho download');
+        // Download without frame
         const link = document.createElement('a');
         link.download = `birthday-frame-${Date.now()}.png`;
-        link.href = downloadCanvas.toDataURL('image/png');
+        link.href = targetCanvas.toDataURL('image/png');
         link.click();
-        showToast('Đã tải ảnh (không có frame)', 'success');
+        showToast('Đã tải ảnh (không có frame)', 'warning');
     };
-    frameImg.src = 'bg-opt1.svg';
+    frameImg.src = frameSvgBlobUrl;
 }
 
 function downloadFinalImage(canvas) {
@@ -421,20 +447,11 @@ function downloadFinalImage(canvas) {
     showToast('Đã tải ảnh thành công!', 'success');
 }
 
-function downloadFinalImage(canvas) {
-    if (!imgSrc) return;
-    
-    const link = document.createElement('a');
-    link.download = `birthday-frame-${Date.now()}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-    showToast('Đã tải ảnh thành công!', 'success');
-}
-
-// ===== Frame Overlay =====
+// ===== Age Text Update =====
 function updateAgeText() {
-    // Could update SVG text dynamically, but for now we keep it static
-    // Future: dynamic age in frame
+    const age = ageInput.value || '18';
+    console.log('Age updated to:', age);
+    // TODO: Update frame text dynamically based on age
 }
 
 // ===== Toast =====
@@ -456,4 +473,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ===== Initialize =====
-showToast('Chào mừng! Hãy tải ảnh của bạn lên.', 'success');
+document.addEventListener('DOMContentLoaded', () => {
+    loadFrameSvg(); // Load frame SVG on startup
+    showToast('Chào mừng! Hãy tải ảnh của bạn lên.', 'success');
+});
