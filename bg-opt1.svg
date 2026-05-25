@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <defs>
+    <pattern id="bgPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="#c71585" opacity="0.05"/>
+      <circle cx="10" cy="10" r="2" fill="#c71585" opacity="0.15"/>
+      <circle cx="30" cy="30" r="2" fill="#c71585" opacity="0.15"/>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bgPattern)"/>
+  <g id="corners">
+    <path d="M0 0 L60 0 Q40 40 0 60 Z" fill="#c71585" opacity="0.9"/>
+    <path d="M0 0 L45 0 Q30 30 0 45 Z" fill="#ff69b4"/>
+    <path d="M400 0 L340 0 Q360 40 400 60 Z" fill="#c71585" opacity="0.9"/>
+    <path d="M400 0 L355 0 Q370 30 400 45 Z" fill="#ff69b4"/>
+    <path d="M0 400 L60 400 Q40 360 0 340 Z" fill="#c71585" opacity="0.9"/>
+    <path d="M0 400 L45 400 Q30 370 0 355 Z" fill="#ff69b4"/>
+    <path d="M400 400 L340 400 Q360 360 400 340 Z" fill="#c71585" opacity="0.9"/>
+    <path d="M400 400 L355 400 Q370 370 400 355 Z" fill="#ff69b4"/>
+  </g>
+  <g fill="#FFD700">
+    <path d="M30 80 L32 85 L37 85 L33 88 L35 93 L30 90 L25 93 L27 88 L23 85 L28 85 Z"/>
+    <path d="M370 120 L371 123 L374 123 L372 125 L373 128 L370 126 L367 128 L368 125 L366 123 L369 123 Z"/>
+    <path d="M50 350 L51 352 L54 352 L52 354 L53 356 L50 355 L47 356 L48 354 L46 352 L49 352 Z"/>
+    <path d="M350 370 L352 373 L357 373 L354 375 L355 378 L352 376 L349 378 L350 375 L348 373 L351 373 Z"/>
+  </g>
+  <g>
+    <polygon points="20,50 22,55 27,55 23,58 25,63 20,60 15,63 17,58 13,55 18,55" fill="#FFD700" opacity="0.8"/>
+    <polygon points="380,70 381,73 384,73 382,74 383,77 381,75 379,77 380,74 378,73 381,73" fill="#FFD700" opacity="0.8"/>
+    <polygon points="40,360 41,363 44,363 42,364 43,367 40,365 37,367 38,364 36,363 39,363" fill="#FFD700" opacity="0.8"/>
+    <polygon points="360,340 362,344 367,344 364,346 365,349 362,347 359,349 360,346 358,344 361,344" fill="#FFD700" opacity="0.8"/>
+  </g>
+  <text x="200" y="50" text-anchor="middle" fill="#c71585" font-family="Playfair Display" font-weight="700" font-size="32">18</text>
+  <text x="206" y="65" text-anchor="middle" font-family="Montserrat" font-weight="800" font-size="14" fill="#c71585">TUỔI</text>
+  <text x="200" y="380" text-anchor="middle" fill="#c71585" font-family="Montserrat" font-weight="700" font-size="16">HAPPY 18TH BIRTHDAY</text>
+</svg>

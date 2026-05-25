@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rực Rỡ Tuổi 18 - Kim Oanh Group</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="brand-logo">
+                <svg viewBox="0 0 100 100" class="logo-svg">
+                    <circle cx="50" cy="50" r="45" stroke="#ff6900" stroke-width="2" fill="none"/>
+                    <text x="50" y="45" text-anchor="middle" fill="#ff6900" font-family="Montserrat" font-weight="700" font-size="11">CELEBRATE</text>
+                    <text x="50" y="60" text-anchor="middle" fill="#ff6900" font-family="Montserrat" font-weight="800" font-size="14">18 YEARS</text>
+                </svg>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="title-section">
+                <h1 class="title-main">RỰC RỠ TUỔI <span class="highlight">18</span>,</h1>
+                <h2 class="title-sub">Còn bạn?</h2>
+            </div>
+
+            <div class="content-grid">
+                <div class="preview-section">
+                    <div class="preview-box" id="previewBox">
+                        <div class="image-layer" id="imageLayer">
+                            <div class="placeholder" id="placeholder">
+                                <svg class="placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" 
+                                          d="M9 12h.01M15 12h.01M10 16c.5 1.5 2.5 1.5 3 0M8.5 7.5h7"/>
+                                </svg>
+                                <p class="placeholder-text">Ảnh của bạn</p>
+                                <p class="placeholder-sub">Kéo và thả hoặc tải lên hình ảnh</p>
+                            </div>
+                            <img id="userImage" class="user-image hidden" alt="User photo">
+                            <canvas id="canvasLayer" class="hidden"></canvas>
+                        </div>
+                        <div class="frame-overlay" id="frameOverlay">
+                            <img src="bg-opt1.svg" alt="Frame" class="frame-svg-img">
+                        </div>
+                    </div>
+                    
+                    <div id="zoomControls" class="zoom-controls hidden">
+                        <button type="button" class="zoom-btn" id="zoomOut">-</button>
+                        <input type="range" id="zoomSlider" min="50" max="200" value="100" class="zoom-slider">
+                        <button type="button" class="zoom-btn" id="zoomIn">+</button>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-card">
+                        <form id="uploadForm" class="upload-form">
+                            <div class="upload-zone" id="dropZone">
+                                <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg, image/gif" class="file-input">
+                                <div class="upload-content">
+                                    <div class="upload-icon-wrapper">
+                                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                            <path d="M7 10l5-5 5 5"/>
+                                            <path d="M12 5v12"/>
+                                        </svg>
+                                    </div>
+                                    <p class="upload-text">Kéo và thả hoặc tải lên hình ảnh</p>
+                                    <p class="upload-hint">PNG, JPG (tối đa 10MB)</p>
+                                </div>
+                            </div>
+
+                            <div id="filePreview" class="file-preview hidden">
+                                <div class="file-info">
+                                    <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                                        <path d="M14 2v6h6"/>
+                                    </svg>
+                                    <div class="file-details">
+                                        <p class="file-name" id="fileName">image.png</p>
+                                        <p class="file-size" id="fileSize">2.5 MB</p>
+                                    </div>
+                                    <button type="button" class="remove-btn" id="removeFile">×</button>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="ageInput" class="input-label">Tuổi rực rỡ</label>
+                                <input type="text" id="ageInput" value="18" class="age-input" placeholder="Nhập tuổi của bạn">
+                            </div>
+
+                            <div class="button-group">
+                                <button type="button" id="viewBtn" class="btn btn-primary" disabled>
+                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/>
+                                    </svg>
+                                    Xem Review
+                                </button>
+                                <button type="button" id="downloadBtn" class="btn btn-secondary" disabled>
+                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                        <path d="M7 10l5 5 5-5"/>
+                                        <path d="M12 15V3"/>
+                                    </svg>
+                                    Tải xuống
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal hidden">
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Ảnh Review</h3>
+                <button type="button" class="close-btn" id="closeModal">×</button>
+            </div>
+            <div class="modal-body">
+                <canvas id="modalCanvas"></canvas>
+            </div>
+            <div class="modal-footer">
+                <div class="zoom-controls">
+                    <button type="button" class="zoom-btn" id="modalZoomOut">-</button>
+                    <input type="range" id="modalZoomSlider" min="50" max="200" value="100" class="zoom-slider">
+                    <button type="button" class="zoom-btn" id="modalZoomIn">+</button>
+                </div>
+                <button type="button" id="modalDownload" class="btn btn-primary btn-full">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <path d="M7 10l5 5 5-5"/>
+                        <path d="M12 15V3"/>
+                    </svg>
+                    Tải ảnh xuống
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
