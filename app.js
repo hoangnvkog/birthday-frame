@@ -309,9 +309,29 @@ function renderFinalCanvas(targetCanvas) {
             ctx.translate(-size/2, -size/2);
             ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
             ctx.restore();
+            
+            // After drawing image, draw frame overlay
+            drawFrame(ctx, size);
+        };
+        img.onerror = () => {
+            showToast('Lỗi vẽ ảnh', 'error');
         };
         img.src = imgSrc;
+    } else {
+        // If no image, just draw frame
+        drawFrame(ctx, size);
     }
+}
+
+function drawFrame(ctx, size) {
+    const frameImg = new Image();
+    frameImg.onload = () => {
+        ctx.drawImage(frameImg, 0, 0, size, size);
+    };
+    frameImg.onerror = () => {
+        console.warn('Không thể tải frame SVG');
+    };
+    frameImg.src = 'bg-opt1.svg';
 }
 
 function handleModalZoom(e) {
@@ -359,15 +379,46 @@ function downloadImage() {
             ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
             ctx.restore();
             
-            // Trigger download
-            const link = document.createElement('a');
-            link.download = `birthday-frame-${Date.now()}.png`;
-            link.href = downloadCanvas.toDataURL('image/png');
-            link.click();
-            showToast('Đã tải ảnh thành công!', 'success');
+            // After drawing image, draw frame overlay (high quality)
+            drawFrameHQ(ctx, 1200);
+        };
+        img.onerror = () => {
+            showToast('Lỗi vẽ ảnh tải xuống', 'error');
         };
         img.src = imgSrc;
     }
+}
+
+function drawFrameHQ(ctx, size) {
+    const frameImg = new Image();
+    frameImg.onload = () => {
+        ctx.drawImage(frameImg, 0, 0, size, size);
+        
+        // Trigger download after frame is drawn
+        const link = document.createElement('a');
+        link.download = `birthday-frame-${Date.now()}.png`;
+        link.href = downloadCanvas.toDataURL('image/png');
+        link.click();
+        showToast('Đã tải ảnh thành công!', 'success');
+    };
+    frameImg.onerror = () => {
+        console.warn('Không thể tải frame SVG cho download');
+        // Download without frame if frame fails
+        const link = document.createElement('a');
+        link.download = `birthday-frame-${Date.now()}.png`;
+        link.href = downloadCanvas.toDataURL('image/png');
+        link.click();
+        showToast('Đã tải ảnh (không có frame)', 'success');
+    };
+    frameImg.src = 'bg-opt1.svg';
+}
+
+function downloadFinalImage(canvas) {
+    const link = document.createElement('a');
+    link.download = `birthday-frame-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('Đã tải ảnh thành công!', 'success');
 }
 
 function downloadFinalImage(canvas) {
